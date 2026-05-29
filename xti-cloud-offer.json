@@ -1,0 +1,66 @@
+{
+ "$schema": "https://schema.management.azure.com/schemas/2019-08-01/subscriptionDeploymentTemplate.json#",
+ "contentVersion": "1.0.0.0",
+ "parameters": {
+  "mspOfferName": {
+   "type": "string",
+   "metadata": {
+    "description": "Specify a unique name for your offer"
+   },
+   "defaultValue": "Cloud Admin"
+  },
+  "mspOfferDescription": {
+   "type": "string",
+   "metadata": {
+    "description": ""
+   },
+   "defaultValue": ""
+  }
+ },
+ "variables": {
+  "mspRegistrationName": "[guid(parameters('mspOfferName'))]",
+  "mspAssignmentName": "[guid(parameters('mspOfferName'))]",
+  "managedByTenantId": "43d491ee-0a80-473b-a8b0-937cba92c1ce",
+  "authorizations": [
+   {
+    "principalId": "bd661e4e-74d5-411b-97ff-f6cf7302ec02",
+    "roleDefinitionId": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+    "principalIdDisplayName": "Cloud Admin"
+   }
+  ]
+ },
+ "resources": [
+  {
+   "type": "Microsoft.ManagedServices/registrationDefinitions",
+   "apiVersion": "2022-10-01",
+   "name": "[variables('mspRegistrationName')]",
+   "properties": {
+    "registrationDefinitionName": "[parameters('mspOfferName')]",
+    "description": "[parameters('mspOfferDescription')]",
+    "managedByTenantId": "[variables('managedByTenantId')]",
+    "authorizations": "[variables('authorizations')]"
+   }
+  },
+  {
+   "type": "Microsoft.ManagedServices/registrationAssignments",
+   "apiVersion": "2022-10-01",
+   "name": "[variables('mspAssignmentName')]",
+   "dependsOn": [
+    "[resourceId('Microsoft.ManagedServices/registrationDefinitions/', variables('mspRegistrationName'))]"
+   ],
+   "properties": {
+    "registrationDefinitionId": "[resourceId('Microsoft.ManagedServices/registrationDefinitions/', variables('mspRegistrationName'))]"
+   }
+  }
+ ],
+ "outputs": {
+  "mspOfferName": {
+   "type": "string",
+   "value": "[concat('Managed by', ' ', parameters('mspOfferName'))]"
+  },
+  "authorizations": {
+   "type": "array",
+   "value": "[variables('authorizations')]"
+  }
+ }
+}
